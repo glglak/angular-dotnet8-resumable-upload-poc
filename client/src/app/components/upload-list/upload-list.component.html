@@ -1,0 +1,61 @@
+<div class="upload-list-container">
+  <h2>Uploads</h2>
+  
+  <div class="empty-message" *ngIf="uploads.length === 0">
+    No active uploads. Drag and drop a file to start uploading.
+  </div>
+  
+  <div class="upload-list">
+    <div 
+      class="upload-item" 
+      *ngFor="let upload of uploads; trackBy: trackByUploadId"
+      [class]="getStatusClass(upload.status)">
+      
+      <div class="upload-info">
+        <span class="file-name">{{ upload.fileName }}</span>
+        <span class="file-size">({{ upload.fileSize | fileSize }})</span>
+      </div>
+      
+      <div class="upload-status">
+        <span class="status-badge" [class]="getStatusClass(upload.status)">
+          {{ getStatusLabel(upload.status) }}
+        </span>
+        
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="upload.progress"></div>
+        </div>
+        
+        <div class="progress-text">
+          {{ upload.progress | number:'1.0-0' }}% 
+          ({{ upload.uploaded | fileSize }})
+          <span class="error-message" *ngIf="upload.error">
+            Error: {{ upload.error }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="upload-actions">
+        <button 
+          class="btn btn-pause" 
+          *ngIf="upload.status === 'uploading'"
+          (click)="onPauseClick(upload.uploadId, $event)">
+          Pause
+        </button>
+        
+        <button 
+          class="btn btn-resume" 
+          *ngIf="upload.status === 'paused'"
+          (click)="onResumeClick(upload.uploadId, $event)">
+          Resume
+        </button>
+        
+        <button 
+          class="btn btn-cancel" 
+          *ngIf="upload.status !== 'completed'"
+          (click)="onCancelClick(upload.uploadId, $event)">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
