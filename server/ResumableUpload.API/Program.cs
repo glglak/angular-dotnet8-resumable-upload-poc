@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Options;
+using ResumableUpload.API.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,6 +26,13 @@ builder.Services.Configure<UploadSettings>(
 
 // Register services
 builder.Services.AddSingleton<IUploadService, UploadService>();
+builder.Services.AddHostedService<UploadCleanupService>();
+
+// Configure request size limits
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
+});
 
 var app = builder.Build();
 
