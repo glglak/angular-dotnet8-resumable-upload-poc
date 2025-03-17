@@ -1,0 +1,27 @@
+<div class="uploader-container">
+  <div 
+    class="drop-zone" 
+    [class.active]="isDragging"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="triggerFileInput()">
+    
+    <div class="drop-message">
+      <i class="upload-icon">&#x2B06;</i>
+      <h3>Drop file here or click to browse</h3>
+      <p>Support for large files (1GB+) with resumable upload</p>
+    </div>
+    
+    <input 
+      type="file" 
+      id="file-input" 
+      (change)="onFileChange($event)"
+      style="display: none">
+  </div>
+  
+  <div class="selected-file" *ngIf="selectedFile">
+    <span class="file-name">{{ selectedFile.name }}</span>
+    <span class="file-size">({{ selectedFile.size | fileSize }})</span>
+  </div>
+</div>
