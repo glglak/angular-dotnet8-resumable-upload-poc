@@ -56,7 +56,7 @@ This proof of concept demonstrates how to implement large file uploads (1GB+) us
 
 2. Set up the backend
    ```bash
-   cd server
+   cd server/ResumableUpload.API
    dotnet restore
    dotnet build
    dotnet run
@@ -80,8 +80,9 @@ The application provides several configuration options:
 - `maxConcurrentUploads`: Maximum number of chunks to upload simultaneously (default: 3)
 - `retryAttempts`: Number of retry attempts for failed chunks (default: 5)
 - `retryDelay`: Delay between retries in milliseconds (default: 1000)
+- `simulateTimeout`: Set to true to randomly simulate connection issues (for testing)
 
-### Backend Configuration (`server/appsettings.json`)
+### Backend Configuration (`server/ResumableUpload.API/appsettings.json`)
 - `UploadSettings:ChunkStoragePath`: Temporary storage location for chunks
 - `UploadSettings:CompletedFilesPath`: Storage location for completed files
 - `UploadSettings:MaxRequestSize`: Maximum request size (default: 10MB)
@@ -92,8 +93,8 @@ The application provides several configuration options:
 The POC includes utilities to test the resume capability:
 
 1. **Network Throttling**: Use browser DevTools to simulate slow connections
-2. **Timeout Simulation**: Enable artificial timeout simulation in the configuration
-3. **Connection Interruption**: The UI provides a button to simulate connection loss
+2. **Timeout Simulation**: Enable artificial timeout simulation in the frontend configuration
+3. **Connection Interruption**: The UI provides a "Simulate Connection Loss" button to test resume functionality
 
 ## API Endpoints
 
@@ -102,6 +103,42 @@ The POC includes utilities to test the resume capability:
 - `GET /api/upload/status/{id}`: Gets the status of an upload
 - `POST /api/upload/complete`: Completes an upload, triggering assembly
 - `DELETE /api/upload/{id}`: Cancels an upload and cleans up chunks
+
+## Implementation Details
+
+### Frontend
+- **File Chunking**: Uses browser's `File.slice()` API to divide large files into manageable chunks
+- **Checksum Generation**: Implements SparkMD5 to calculate checksums for integrity verification
+- **Upload Management**: Tracks upload state, progress, and handles retries with the service
+- **IndexedDB Storage**: Persists upload sessions using idb-keyval for resuming after page refresh
+- **Service Worker**: Handles uploads in the background, enabling continued uploading even when the app isn't the active tab
+- **Parallel Processing**: Configurable concurrent chunk uploads with throttling to avoid overwhelming the server
+
+### Backend
+- **In-Memory Session Tracking**: Maintains upload session state for active uploads
+- **Efficient File I/O**: Uses non-blocking async operations for chunk handling
+- **Atomic Operations**: Ensures file integrity throughout the upload process
+- **Cleanup Service**: Background service that manages expired uploads to free up resources
+- **Checksum Verification**: Validates file integrity during reassembly
+
+## Best Practices
+
+1. **Progressive Enhancement**: Falls back to standard uploads if Service Workers aren't supported
+2. **Memory Management**: Processes chunks in a streaming fashion to handle very large files
+3. **Error Handling**: Comprehensive error handling with retry mechanisms
+4. **User Feedback**: Clear progress indication and meaningful error messages
+5. **Resource Cleanup**: Automated cleanup of temporary files and expired uploads
+
+## Notes for Production Use
+
+While this POC demonstrates the core functionality of resumable uploads, additional considerations for production use include:
+
+- User authentication and authorization
+- Rate limiting and quotas
+- S3/Azure Blob Storage integration for scalable storage
+- Database persistence for upload sessions instead of in-memory storage
+- Comprehensive logging and monitoring
+- CDN integration for static assets
 
 ## License
 
