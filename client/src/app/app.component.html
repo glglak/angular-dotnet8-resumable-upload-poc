@@ -1,0 +1,29 @@
+<div class="app-container">
+  <header>
+    <h1>{{ title }}</h1>
+    <p>Upload large files with automatic resume capability</p>
+  </header>
+
+  <main>
+    <div class="upload-section">
+      <app-file-uploader (fileSelected)="onFileSelected($event)"></app-file-uploader>
+      
+      <div class="test-controls">
+        <button class="btn btn-warning" (click)="simulateConnectionLoss()">
+          Simulate Connection Loss
+        </button>
+      </div>
+    </div>
+
+    <app-upload-list 
+      [uploads]="uploadProgress"
+      (cancelUpload)="onCancelUpload($event)"
+      (pauseUpload)="onPauseUpload($event)"
+      (resumeUpload)="onResumeUpload($event)">
+    </app-upload-list>
+  </main>
+
+  <footer>
+    <p>Angular + .NET 8 Resumable Upload POC</p>
+  </footer>
+</div>
